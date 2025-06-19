@@ -9,3 +9,5 @@ spring:
       ddl-auto: create-drop
 server:
   port: 8081
+application:
+  secret-key: 6f676c714c5e3e67517b6a6e32685c78215f5368706e76484548537043

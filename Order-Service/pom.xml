@@ -7,7 +7,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>order-service</artifactId>
+    <artifactId>Order-Service</artifactId>
     <packaging>jar</packaging>
 
     <name>Order-Service</name>
