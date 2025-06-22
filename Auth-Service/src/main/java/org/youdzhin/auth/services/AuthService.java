@@ -11,8 +11,11 @@ import org.youdzhin.auth.config.JwtService;
 import org.youdzhin.auth.dto.AuthRequest;
 import org.youdzhin.auth.dto.AuthResponse;
 import org.youdzhin.auth.dto.RegisterRequest;
+import org.youdzhin.auth.interfaces.TokenRepository;
 import org.youdzhin.auth.interfaces.UserRepository;
-import org.youdzhin.auth.models.User;
+import org.youdzhin.auth.models.enums.TokenType;
+import org.youdzhin.auth.models.token.Token;
+import org.youdzhin.auth.models.user.User;
 import org.youdzhin.auth.models.enums.Roles;
 
 @Service
@@ -23,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager manager;
+    private final TokenRepository tokenRepository;
 
 
     public AuthResponse register (RegisterRequest request) {
@@ -37,6 +41,17 @@ public class AuthService {
 
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
+
+        var tokenToSave = Token.builder()
+                .user(user)
+                .value(jwtToken)
+                .TokenType(TokenType.BEARER)
+                .isExpired(false)
+                .isRevoked(false)
+                .build();
+        revokeAllUserTokens(user);
+        tokenRepository.save(tokenToSave);
+
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -54,10 +69,34 @@ public class AuthService {
 
         var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UsernameNotFoundException("sth gone wrong"));
         var jwtToken = jwtService.generateToken(user);
+
+        var tokenToSave = Token.builder()
+                .user(user)
+                .value(jwtToken)
+                .TokenType(TokenType.BEARER)
+                .isExpired(false)
+                .isRevoked(false)
+                .build();
+        revokeAllUserTokens(user);
+        tokenRepository.save(tokenToSave);
+
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
 
     }
+
+    public void revokeAllUserTokens (User user) {
+        var validUserTokens = tokenRepository.findValidTokenByUserId(user.getId());
+        if (validUserTokens.isEmpty()) {
+            return;
+        }
+        validUserTokens.forEach(t -> {
+            t.setRevoked(true);
+            t.setExpired(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
+    }
+
 
 }

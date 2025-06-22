@@ -1,10 +1,9 @@
-package org.youdzhin.auth.models;
+package org.youdzhin.auth.models.user;
 
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,12 +13,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.youdzhin.auth.models.enums.Roles;
+import org.youdzhin.auth.models.token.Token;
 
 import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "auth_users")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,6 +32,7 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Email should be valid")
+    @Column(unique = true)
     private String email;
 
     @NotBlank(message = "Password cannot be blank")
@@ -48,6 +49,9 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Roles role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
