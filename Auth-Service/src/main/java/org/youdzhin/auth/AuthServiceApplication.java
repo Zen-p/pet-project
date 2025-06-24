@@ -21,7 +21,7 @@ public class AuthServiceApplication {
 
 
 @RestController
-@RequestMapping("/api/v1/demo")
+@RequestMapping("/api/v1/auth/demo")
 class DemoController {
 
     @GetMapping

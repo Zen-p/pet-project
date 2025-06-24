@@ -31,16 +31,16 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain (HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Отключаем CSRF
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Публичные эндпоинты
-                        .anyRequest().authenticated() // Все остальные требуют аутентификации
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Без сессий
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider) // Наш провайдер аутентификации
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // Наш JWT-фильтр
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(c -> c
                         .addLogoutHandler(logoutHandler)
                         .logoutUrl("/api/v1/auth/logout")
