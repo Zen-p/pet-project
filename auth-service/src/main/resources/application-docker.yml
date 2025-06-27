@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: auth
+  datasource:
+    url: jdbc:postgresql://postgres:5432/pet_project_database
+    username: postgres
+    password: password
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+server:
+  port: 80
+application:
+  security:
+    jwt:
+      secret-key: 6f676c714c5e3e67517b6a6e32685c78215f5368706e76484548537043
+      access-token:
+        expiration: 86400000
+      refresh-token:
+        expiration: 604800000
+
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+  client:
+    initial-instance-info-replication-interval-seconds: 10
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka

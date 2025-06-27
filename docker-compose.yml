@@ -12,11 +12,48 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - postgres
+      - project-network
     restart: unless-stopped
 
+  auth-service:
+    image: youdzhin/auth-service:latest
+    container_name: auth-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "80:80"
+    networks:
+      - project-network
+    depends_on:
+      - eureka-service
+
+
+  eureka-service:
+    image: youdzhin/sureka-server:latest
+    container_name: eureka-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8761:8761"
+    networks:
+      - project-network
+
+  api-gateway:
+    image: youdzhin/api-gateway:latest
+    container_name: api-gateway
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-service
+    networks:
+      - project-network
+
+
+
 networks:
-  postgres:
+  project-network:
     driver: bridge
 
 volumes:
