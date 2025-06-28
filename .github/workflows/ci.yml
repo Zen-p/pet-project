@@ -2,11 +2,7 @@ name: CI
 
 on:
   push:
-    paths:
-      - pet-project/**
   pull_request:
-    paths:
-      - pet-project/**
 
 jobs:
   build:
