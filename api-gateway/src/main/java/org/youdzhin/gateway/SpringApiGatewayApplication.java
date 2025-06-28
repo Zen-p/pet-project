@@ -9,7 +9,7 @@ public class SpringApiGatewayApplication {
 
     public static void main(String[] args) {
 
-        SpringApplication.run(SpringApiGatewayApplication.class, args);
+        SpringApplication.run(SpringApiGatewayApplication.class, args); // сщььуте
 
     }
 }
