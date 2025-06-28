@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class GatewayConfig {
 
 
+
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder, RouteDefinitionLocator definitionLocator) {
         return builder.routes().build();
