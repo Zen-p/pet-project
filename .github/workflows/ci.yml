@@ -1,12 +1,12 @@
-name: CI - Build Backend
+name: CI
 
 on:
+  push:
+    paths:
+      - pet-project/**
   pull_request:
-    branches: [main]
-    paths: ['pet-project/**']
-  push:           # ← Добавлено
-    branches: [main]
-    paths: ['pet-project/**']
+    paths:
+      - pet-project/**
 
 jobs:
   build:
