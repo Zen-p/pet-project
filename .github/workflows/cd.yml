@@ -50,8 +50,22 @@ jobs:
           username: evgenijpesko
           password: zena66
           script: |
-            cd /pet-project  # Путь к вашему docker-compose.yml на сервере
-            docker compose down || true  # Игнорируем ошибки, если контейнеров нет
+            cd /pet-project  
+            docker-compose down || true
+            docker-compose pull
+            docker-compose up -d
+            
+            if [ ! -d "/pet-project" ]; then
+              echo "Клонируем репозиторий..."
+              git clone https://${{ secrets.GIT_TOKEN }}@github.com/pet-project.git /pet-project
+            else
+              echo "Обновляем репозиторий..."
+              cd /pet-project
+              git pull
+            fi
+            
+            cd /pet-project || exit 1
+            docker compose down || true
             docker compose pull
             docker compose up -d
 
