@@ -45,8 +45,8 @@ jobs:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: 46.56.192.63
-          port: 64501
+          host: 0.tcp.eu.ngrok.io
+          port: 13558
           username: testuser
           password: test
           script: |
