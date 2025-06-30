@@ -50,17 +50,24 @@ jobs:
           username: evgenijpesko
           password: zena66
           script: |
+            # 1. Настройка окружения
+            export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
             
-            if [ ! -d "/pet-project" ]; then
+            # 2. Рабочая директория (в домашней папке)
+            WORKDIR="$HOME/pet-project"
+            
+            # 3. Клонирование/обновление
+            if [ ! -d "$WORKDIR" ]; then
               echo "Клонируем репозиторий..."
-              git clone https://${{ secrets.GIT_TOKEN }}@github.com/pet-project.git /pet-project
+              git clone https://${{ secrets.GIT_TOKEN }}@github.com/pet-project.git "$WORKDIR"
             else
               echo "Обновляем репозиторий..."
-              cd /pet-project
+              cd "$WORKDIR" || exit 1
               git pull
             fi
             
-            cd /pet-project || exit 1
+            # 4. Запуск контейнеров
+            cd "$WORKDIR" || exit 1
             docker compose down || true
             docker compose pull
             docker compose up -d
