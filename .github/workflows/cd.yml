@@ -45,7 +45,7 @@ jobs:
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: 7.tcp.eu.ngrok.io:17553
+          host: 5.tcp.eu.ngrok.io:19133
           username: evgenijpesko
           password: zena66
           script: |
