@@ -2,7 +2,6 @@ name: CD
 
 on:
   workflow_dispatch:
-  push:
 
 jobs:
   build:
@@ -53,8 +52,43 @@ jobs:
           script: |
             whoami
             pwd
-            git clone https://oauth2:${{ secrets.GIT_TOKEN }}@github.com/Zen-p/pet-project.git
-            cd pet-project
+            # Проверяем наличие Docker
+            if ! command -v docker &> /dev/null; then
+              echo "Docker не найден. Устанавливаем Docker Desktop..."
+              # Устанавливаем Homebrew, если отсутствует
+              if ! command -v brew &> /dev/null; then
+                echo "Устанавливаем Homebrew..."
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
+                eval "$(/opt/homebrew/bin/brew shellenv)"
+              fi
+              # Устанавливаем Docker Desktop через Homebrew
+              brew install --cask docker
+              # Запускаем Docker Desktop
+              open /Applications/Docker.app
+              # Ждем, пока Docker Desktop запустится
+              echo "Ожидаем запуска Docker Desktop..."
+              sleep 30
+            fi
+            # Проверяем версию Docker
+            docker --version
+            # Проверяем наличие docker compose
+            if ! docker compose version &> /dev/null; then
+              echo "Docker Compose не найден. Плагин должен быть установлен с Docker Desktop."
+              exit 1
+            fi
+            docker compose version
+            # Клонируем или обновляем репозиторий
+            if [ -d "pet-project" ]; then
+              echo "Репозиторий уже существует, обновляем..."
+              cd pet-project
+              git pull origin main
+            else
+              echo "Клонируем репозиторий..."
+              git clone https://oauth2:${{ secrets.GIT_TOKEN }}@github.com/Zen-p/pet-project.git
+              cd pet-project
+            fi
+            # Выполняем команды Docker Compose
             docker compose down -v
             docker compose pull
             docker compose up -d
