@@ -22,24 +22,25 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v4 # клонировать репозиторий
-      - uses: actions/setup-java@v4 #
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven' # использовать кеш для повышения производительности
+          cache: 'maven'
       - name: Login to Docker
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
-      - name: Set build id (generate value) # создать уникальный тег на основании времени
+      - name: Set build id
         id: build-number
         run: echo "BUILD_NUMBER=$(date '+%d.%m.%Y.%H.%M.%S')" >> $GITHUB_OUTPUT
-      - name: Build Package Push with Maven # собрать проект с новой переменной
+      - name: Build Package Push with Maven
         run: mvn -ntp -B verify -Ddocker.version.tag=${{steps.build-number.outputs.BUILD_NUMBER}} jib:build
+
   deploy-to-vps:
-    needs: build  # Ждём успешной сборки и пуша. зависит от успешной job build
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to VPS via SSH
@@ -50,42 +51,10 @@ jobs:
           username: evgenijpesko
           password: zena66
           script: |
-            echo "=== Начало развертывания ==="
-            echo "Пользователь: $(whoami)"
-            echo "Текущий путь: $(pwd)"
-            
-            # Проверяем установлен ли Docker
-            if ! command -v docker &> /dev/null; then
-              echo "ОШИБКА: Docker не установлен или не настроен!"
-              echo "Установите Docker Desktop вручную: https://docs.docker.com/desktop/install/mac-install/"
-              exit 1
-            fi
-            
-            # Проверяем что Docker запущен
-            if ! docker info &> /dev/null; then
-              echo "ОШИБКА: Docker не запущен!"
-              echo "Запустите Docker Desktop и убедитесь, что демон работает"
-              exit 1
-            fi
-            
-            # Рабочая директория в домашнем каталоге
-            WORK_DIR="$HOME/pet-project"
-            mkdir -p "$WORK_DIR"
-            cd "$WORK_DIR" || exit 1
-            
-            # Работа с репозиторием
-            if [ ! -d ".git" ]; then
-              echo "Клонируем репозиторий..."
-              git clone https://${{ secrets.GIT_TOKEN }}@github.com/pet-project.git .
-            else
-              echo "Обновляем репозиторий..."
-              git pull
-            fi
-            
-            # Запуск контейнеров
-            docker compose version
-            docker compose down || true
+            whoami
+            pwd
+            git clone https://oauth2:${{ secrets.GIT_TOKEN }}@github.com/Zen-p/pet-project.git
+            cd pet-project
+            docker compose down -v
             docker compose pull
             docker compose up -d
-            
-            echo "=== Развертывание завершено ==="
