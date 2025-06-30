@@ -50,26 +50,38 @@ jobs:
           username: evgenijpesko
           password: zena66
           script: |
-            # 1. Настройка окружения
-            export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
+            echo "Текущая директория: $(pwd)"
+            echo "Пользователь: $(whoami)"
+            echo "Проверка Docker: $(docker --version || echo 'Docker не установлен')"
             
-            # 2. Рабочая директория (в домашней папке)
-            WORKDIR="$HOME/pet-project"
+            # Проверка и установка Docker
+            if ! command -v docker &> /dev/null; then
+              echo "Установка Docker..."
+              # Для macOS используем Homebrew
+              /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+              brew install --cask docker
+              open -a Docker  # Запускаем Docker Desktop
+              while ! docker info &> /dev/null; do
+                echo "Ожидаем запуск Docker..."
+                sleep 5
+              done
+            fi
             
-            # 3. Клонирование/обновление
-            if [ ! -d "$WORKDIR" ]; then
+            # Создаем рабочую директорию
+            WORK_DIR="$HOME/pet-project"
+            mkdir -p "$WORK_DIR"
+            cd "$WORK_DIR" || exit 1
+            
+            # Работа с репозиторием
+            if [ ! -d ".git" ]; then
               echo "Клонируем репозиторий..."
-              git clone https://${{ secrets.GIT_TOKEN }}@github.com/pet-project.git "$WORKDIR"
+              git clone https://${{ secrets.GIT_TOKEN }}@github.com/pet-project.git .
             else
               echo "Обновляем репозиторий..."
-              cd "$WORKDIR" || exit 1
               git pull
             fi
             
-            # 4. Запуск контейнеров
-            cd "$WORKDIR" || exit 1
-            docker compose down || true
-            docker compose pull
-            docker compose up -d
-
-
+            # Запуск контейнеров
+            docker-compose down || true
+            docker-compose pull
+            docker-compose up -d
