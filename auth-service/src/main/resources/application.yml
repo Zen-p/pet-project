@@ -10,7 +10,7 @@ spring:
     hibernate:
       ddl-auto: create-drop
 server:
-  port: 80
+  port: 8085
 application:
   security:
     jwt:

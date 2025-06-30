@@ -21,7 +21,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     ports:
-      - "80:80"
+      - "8085:8085"
     networks:
       - project-network
     depends_on:
