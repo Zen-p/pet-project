@@ -50,24 +50,25 @@ jobs:
           username: evgenijpesko
           password: zena66
           script: |
-            echo "Текущая директория: $(pwd)"
+            echo "=== Начало развертывания ==="
             echo "Пользователь: $(whoami)"
-            echo "Проверка Docker: $(docker --version || echo 'Docker не установлен')"
+            echo "Текущий путь: $(pwd)"
             
-            # Проверка и установка Docker
+            # Проверяем установлен ли Docker
             if ! command -v docker &> /dev/null; then
-              echo "Установка Docker..."
-              # Для macOS используем Homebrew
-              /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-              brew install --cask docker
-              open -a Docker  # Запускаем Docker Desktop
-              while ! docker info &> /dev/null; do
-                echo "Ожидаем запуск Docker..."
-                sleep 5
-              done
+              echo "ОШИБКА: Docker не установлен или не настроен!"
+              echo "Установите Docker Desktop вручную: https://docs.docker.com/desktop/install/mac-install/"
+              exit 1
             fi
             
-            # Создаем рабочую директорию
+            # Проверяем что Docker запущен
+            if ! docker info &> /dev/null; then
+              echo "ОШИБКА: Docker не запущен!"
+              echo "Запустите Docker Desktop и убедитесь, что демон работает"
+              exit 1
+            fi
+            
+            # Рабочая директория в домашнем каталоге
             WORK_DIR="$HOME/pet-project"
             mkdir -p "$WORK_DIR"
             cd "$WORK_DIR" || exit 1
@@ -82,6 +83,9 @@ jobs:
             fi
             
             # Запуск контейнеров
-            docker-compose down || true
-            docker-compose pull
-            docker-compose up -d
+            docker compose version
+            docker compose down || true
+            docker compose pull
+            docker compose up -d
+            
+            echo "=== Развертывание завершено ==="
