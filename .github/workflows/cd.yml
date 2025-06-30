@@ -50,10 +50,6 @@ jobs:
           username: evgenijpesko
           password: zena66
           script: |
-            cd /pet-project  
-            docker-compose down || true
-            docker-compose pull
-            docker-compose up -d
             
             if [ ! -d "/pet-project" ]; then
               echo "Клонируем репозиторий..."
