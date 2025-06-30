@@ -1,0 +1,58 @@
+name: CD
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: pet_project_database
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4 # клонировать репозиторий
+      - uses: actions/setup-java@v4 #
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven' # использовать кеш для повышения производительности
+      - name: Login to Docker
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+      - name: Set build id (generate value) # создать уникальный тег на основании времени
+        id: build-number
+        run: echo "BUILD_NUMBER=$(date '+%d.%m.%Y.%H.%M.%S')" >> $GITHUB_OUTPUT
+      - name: Build Package Push with Maven # собрать проект с новой переменной
+        run: mvn -ntp -B verify -Ddocker.version.tag=${{steps.build-number.outputs.BUILD_NUMBER}} jib:build
+  deploy-to-vps:
+    needs: build  # Ждём успешной сборки и пуша. зависит от успешной job build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 172.20.10.10
+          port: 64501
+          username: testuser
+          password: test
+          script: |
+            cd /pet-project  # Путь к вашему docker-compose.yml на сервере
+            docker compose down || true  # Игнорируем ошибки, если контейнеров нет
+            docker compose pull
+            docker compose up -d
+
+

@@ -7,7 +7,8 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <properties>
-    <image>youdzhin/${project.artifactId}:${project.version}</image>
+    <image>youdzhin/${project.artifactId}:${docker.version.tag}</image>
+    <docker.version.tag/>
   </properties>
 
   <name>pet-project</name>
