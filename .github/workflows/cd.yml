@@ -47,8 +47,8 @@ jobs:
         with:
           host: 0.tcp.eu.ngrok.io
           port: 13558
-          username: testuser
-          password: test
+          username: evgenijpesko
+          password: zena66
           script: |
             cd /pet-project  # Путь к вашему docker-compose.yml на сервере
             docker compose down || true  # Игнорируем ошибки, если контейнеров нет
